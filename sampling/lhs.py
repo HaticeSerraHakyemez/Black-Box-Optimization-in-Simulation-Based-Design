@@ -1,9 +1,5 @@
 import numpy as np
-
-def eggholder_function(x, y):
-    term1 = -(y + 47) * np.sin(np.sqrt(abs(x/2 + (y + 47))))
-    term2 = -x * np.sin(np.sqrt(abs(x - (y + 47))))
-    return term1 + term2
+from utils.exFunctions import eggholder
 
 x_min, x_max = -512, 512
 y_min, y_max = -512, 512
@@ -12,7 +8,7 @@ x_values = np.linspace(x_min, x_max, 1000)
 y_values = np.linspace(y_min, y_max, 1000)
 X, Y = np.meshgrid(x_values, y_values)
 
-Z = eggholder_function(X, Y)
+Z = eggholder([X, Y])
 
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
