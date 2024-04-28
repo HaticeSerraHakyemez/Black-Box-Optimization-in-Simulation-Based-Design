@@ -25,7 +25,7 @@ class ActiveLearning:
         sample_values = self.initial_values
         for iteration in range(self.num_iterations):
             # Generate new candidate samples using sampling strategy
-            new_points = self.sampling_strategy.sample(samples)
+            new_points = self.sampling_strategy.sample(num_samples=5, x_min=-512, y_min=-512, x_max=512, y_max=512)
 
             # Calculate distance score based on distances
             distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
