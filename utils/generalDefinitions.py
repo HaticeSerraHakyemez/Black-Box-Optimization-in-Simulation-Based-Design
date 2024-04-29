@@ -6,14 +6,14 @@ def euclidean_distance(p):
     return np.sqrt(np.sum((p[0] - p[1]) ** 2))
 
 
-class SamplingVisualization:
+class SamplingVisualization2D:
     def __init__(self, initial_points, new_points_all, min_function_values, improvement):
         self.initial_points = initial_points
         self.new_points_all = new_points_all
         self.min_function_values = min_function_values
         self.improvement = improvement
 
-    def plot_results(self, X, Y, Z):
+    def plot_results(self, X, Y, Z, function_name):
 
         # plot samples
         plt.figure(figsize=(12, 10))
@@ -22,7 +22,7 @@ class SamplingVisualization:
         plt.scatter(self.initial_points[:,0], self.initial_points[:, 1], c='red', label='Initial Samples')
         plt.scatter(self.new_points_all[5:, 0], self.new_points_all[5:, 1], c='blue', label='Adaptive Samples')
         plt.legend()
-        plt.title('Initial and Adaptive Samples on Eggholder Function')
+        plt.title(f'Initial and Adaptive Samples on {function_name} Function')  
         plt.xlabel('X')
         plt.ylabel('Y')
         plt.show()
@@ -49,5 +49,5 @@ class SamplingVisualization:
         print(f"Best observed function value after active learning: {min(self.min_function_values)}")
 
         # save_samples_to_dataframe
-        samples_df = pd.DataFrame({"X1": self.new_points_all[:,0], "X2": self.new_points_all[:,1]})
+        samples_df = pd.DataFrame({"X": self.new_points_all[:,0], "Y": self.new_points_all[:,1]})
         print(samples_df)

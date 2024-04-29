@@ -2,8 +2,11 @@ import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error
 import utils.generalDefinitions as func_def
+from skopt import gp_minimize
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import Matern
+from sklearn.linear_model import LinearRegression
     
-# LR, GR and BO will be added
 
 class ActiveLearning:
     def __init__(self, initial_points, initial_values, model, sampling_strategy, num_iterations=1000, tolerance=0.1):
@@ -14,7 +17,7 @@ class ActiveLearning:
         self.num_iterations = num_iterations
         self.tolerance = tolerance
 
-    def run_active_learning(self):
+    def run_active_learning(self, num_samples, ranges):
         # Initialize lists to track performance metrics
         min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
         improvement = []
@@ -25,7 +28,7 @@ class ActiveLearning:
         sample_values = self.initial_values
         for iteration in range(self.num_iterations):
             # Generate new candidate samples using sampling strategy
-            new_points = self.sampling_strategy.sample(num_samples=5, x_min=-512, y_min=-512, x_max=512, y_max=512)
+            new_points = self.sampling_strategy.sample(num_samples, ranges)
 
             # Calculate distance score based on distances
             distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
@@ -81,26 +84,29 @@ class GradientDescentOptimizer:
     def __init__(self, function):
         self.function = function
 
-    def approximate_gradient(self, x, y, h=1e-5):
+    def approximate_gradient(self, point, h=1e-5):
         f = self.function
-        grad_x = (f(x + h, y) - f(x - h, y)) / (2 * h)
-        grad_y = (f(x, y + h) - f(x, y - h)) / (2 * h)
-        return np.array([grad_x, grad_y])
+        gradients = []
+        for i in range(len(point)):
+            h_vector = np.zeros_like(point)
+            h_vector[i] = h
+            grad_i = (f(*(point + h_vector)) - f(*(point - h_vector))) / (2 * h)
+            gradients.append(grad_i)
+        return np.array(gradients)
 
-    def gradient_descent_step(self, x, y, learning_rate=0.001):
-        gradient = self.approximate_gradient(x, y)
-        new_x = x - learning_rate * gradient[0]
-        new_y = y - learning_rate * gradient[1]
-        return new_x, new_y
+    def gradient_descent_step(self, point, learning_rate=0.001):
+        gradient = self.approximate_gradient(point)
+        new_point = point - learning_rate * gradient
+        return new_point
 
-    def optimize(self, x_init, y_init, learning_rate=0.001, num_iterations=100, convergence_threshold=1e-6):
-        x_current, y_current = x_init, y_init
+    def optimize(self, initial_point, learning_rate=0.001, num_iterations=100, convergence_threshold=1e-6):
+        current_point = np.array(initial_point)
         for i in range(num_iterations):
-            x_next, y_next = self.gradient_descent_step(x_current, y_current, learning_rate)
-            if np.sqrt((x_next - x_current)**2 + (y_next - y_current)**2) < convergence_threshold:
+            next_point = self.gradient_descent_step(current_point, learning_rate)
+            if np.linalg.norm(next_point - current_point) < convergence_threshold:
                 break
-            x_current, y_current = x_next, y_next
-        return x_current, y_current
+            current_point = next_point
+        return current_point
     
     
 class RandomForestModel:
@@ -115,3 +121,52 @@ class RandomForestModel:
 
     def get_model(self):
         return self.rf_model
+    
+
+class LinearRegressionModel:
+    def __init__(self):
+        self.lr = None
+
+    def fit(self, inputs, output):
+        self.lr = LinearRegression()
+        self.lr.fit(inputs, output)
+
+    def predict(self, inputs):
+        return self.lr.predict(inputs)
+    
+    
+class GaussianProcessRegressionModel:
+    def __init__(self, kernel=None, alpha=1e-5):
+        self.kernel = kernel
+        self.alpha = alpha
+        self.gp = None
+
+    def fit(self, inputs, output):
+        if self.kernel is None:
+            self.kernel = Matern(nu=2.5)
+        self.gp = GaussianProcessRegressor(kernel=self.kernel, alpha=self.alpha)
+        self.gp.fit(inputs, output)
+
+    def predict(self, inputs):
+        return self.gp.predict(inputs, return_std=True)
+
+
+class BayesianOptimizer:
+    def __init__(self, function, space, acq_func="EI", n_calls=100, n_random_starts=5, noise=0.1**2, random_state=1729):
+        self.function = function
+        self.space = space
+        self.acq_func = acq_func
+        self.n_calls = n_calls
+        self.n_random_starts = n_random_starts
+        self.noise = noise
+        self.random_state = random_state
+
+    def optimize(self):
+        result = gp_minimize(self.function,
+            self.space,
+            acq_func=self.acq_func,
+            n_calls=self.n_calls,
+            n_random_starts=self.n_random_starts,
+            noise=self.noise,
+            random_state=self.random_state)
+        return result
