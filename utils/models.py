@@ -17,7 +17,21 @@ class ActiveLearning:
         self.num_iterations = num_iterations
         self.tolerance = tolerance
 
+    # Weight adjustment function based on iteration and performance
+    def adjust_weights(self, weights, iteration, total_iterations, prev_error, curr_error):
+        weight_factor = (iteration / total_iterations)
+        error_improvement = prev_error - curr_error
+        if error_improvement > 0:
+            weight_factor += 0.1
+        w_distance, w_uncertainty, w_prediction = weights
+        w_prediction = min(w_prediction + weight_factor * 0.05, 0.7)
+        remaining_weight = 1 - w_prediction
+        w_distance = remaining_weight / 2
+        w_uncertainty = remaining_weight / 2
+        return (w_distance, w_uncertainty, w_prediction)    
+
     def run_active_learning(self, num_samples, ranges, k):
+
         # Initialize lists to track performance metrics
         min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
         improvement = []
@@ -27,9 +41,29 @@ class ActiveLearning:
         samples = self.initial_points
         sample_values = self.initial_values
 
+        prev_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+        weights = (0.33, 0.33, 0.34)
+        val_errors = []
+        increasing_error_count = 0  # To monitor increasing validation errors
+
         iter_to_train = 0
 
         for iteration in range(self.num_iterations):
+
+            curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+            if curr_val_error > prev_val_error:
+                increasing_error_count += 1
+            else:
+                increasing_error_count = 0
+
+            if increasing_error_count >= 3:  # Stop if validation error increases for three consecutive iterations
+                pass
+                #print("Stopping early due to increasing validation error.")
+                #break
+
+            weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
+            prev_val_error = curr_val_error
+            val_errors.append(curr_val_error)
             
             iter_to_train+= 1
             
@@ -54,7 +88,7 @@ class ActiveLearning:
             predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
 
             # Calculate joint scores
-            joint_scores = 0.33*distance_scores + 0.33*uncertainty_scores + 0.34*predicted_score
+            joint_scores = weights[0]*distance_scores + weights[1]*uncertainty_scores + weights[2]*predicted_score
 
             # Find the index of the point with the maximum joint score
             index_of_max_joint_score = np.argmin(joint_scores)
