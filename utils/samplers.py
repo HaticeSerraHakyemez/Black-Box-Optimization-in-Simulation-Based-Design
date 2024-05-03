@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.stats import qmc
+import itertools
 
 class Sampler:
     def __init__(self, function):
@@ -20,7 +21,33 @@ class Sampler:
 
     def evaluate_function(self, samples):
         return self.function(samples)
+    
    
+class GridSearch(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        delta = 1
+        grid_points = list(itertools.product(*[np.arange(min_range, max_range + delta, delta) for min_range, max_range in ranges]))
+
+        samples = np.array(grid_points[:num_samples])
+        scaled_samples = self.scale_samples(samples, *ranges)
+
+        return scaled_samples
+
+
+class LatinHypercubeSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        dimension = len(ranges)
+        sampler = qmc.LatinHypercube(d=dimension)
+        samples = sampler.random(n=num_samples)
+        scaled_samples = self.scale_samples(samples, *ranges)
+        return scaled_samples
+    
 
 class RandomSampling(Sampler):
     def __init__(self, function):
@@ -30,7 +57,8 @@ class RandomSampling(Sampler):
         samples = sampler(num_samples, len(ranges))
         samples_scaled = self.scale_samples(samples, *ranges)
         function_values = self.evaluate_function(samples_scaled)
-        return samples_scaled, function_values
+        return samples_scaled
+    
 
 
 class MonteCarloSampling(Sampler):

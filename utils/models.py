@@ -17,7 +17,7 @@ class ActiveLearning:
         self.num_iterations = num_iterations
         self.tolerance = tolerance
 
-    def run_active_learning(self, num_samples, ranges):
+    def run_active_learning(self, num_samples, ranges, k):
         # Initialize lists to track performance metrics
         min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
         improvement = []
@@ -26,7 +26,13 @@ class ActiveLearning:
         # Run active learning loop
         samples = self.initial_points
         sample_values = self.initial_values
+
+        iter_to_train = 0
+
         for iteration in range(self.num_iterations):
+            
+            iter_to_train+= 1
+            
             # Generate new candidate samples using sampling strategy
             new_points = self.sampling_strategy.sample(num_samples, ranges)
 
@@ -63,8 +69,11 @@ class ActiveLearning:
             # Keep track of the minimum function value observed so far
             min_function_values.append(np.min(sample_values))
 
-            # Re-fit the model including the new points
-            self.model.train_model(samples, sample_values)
+            if(iter_to_train == k):    
+
+                # Re-fit the model including the new points
+                iter_to_train = 0
+                self.model.train_model(samples, sample_values)
 
             # Calculate improvement
             rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
