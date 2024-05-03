@@ -6,7 +6,7 @@ from skopt import gp_minimize
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 from sklearn.linear_model import LinearRegression
-    
+
 
 class ActiveLearning:
     def __init__(self, initial_points, initial_values, model, sampling_strategy, num_iterations=1000, tolerance=0.1):
@@ -45,8 +45,16 @@ class ActiveLearning:
             variance = np.var([tree.predict(new_points) for tree in self.model.get_model().estimators_], axis=0)
             uncertainty_scores = 1 - variance / np.max(variance)
 
+            # Predict values for the candidate samples
+            predicted_values = self.model.get_model().predict(new_points)
+
+            # Normalize the predicted values between 0 and 1 using Min-Max normalization
+            min_predicted_value = np.min(predicted_values)
+            max_predicted_value = np.max(predicted_values)
+            predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
+
             # Calculate joint scores
-            joint_scores = 0.5 * distance_scores + 0.5 * uncertainty_scores
+            joint_scores = 0.33*distance_scores + 0.33*uncertainty_scores + 0.34*predicted_score
 
             # Find the index of the point with the maximum joint score
             index_of_max_joint_score = np.argmin(joint_scores)

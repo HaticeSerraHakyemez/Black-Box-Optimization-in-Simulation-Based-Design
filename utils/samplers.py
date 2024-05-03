@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.stats import qmc
-import itertools
+#from sklearn.model_selection import GridSearchCV
+import numpy as np
 
 class Sampler:
     def __init__(self, function):
@@ -28,13 +29,7 @@ class GridSearch(Sampler):
         super().__init__(function)
 
     def sample(self, num_samples, ranges):
-        delta = 1
-        grid_points = list(itertools.product(*[np.arange(min_range, max_range + delta, delta) for min_range, max_range in ranges]))
-
-        samples = np.array(grid_points[:num_samples])
-        scaled_samples = self.scale_samples(samples, *ranges)
-
-        return scaled_samples
+        return 0
 
 
 class LatinHypercubeSampling(Sampler):
@@ -56,7 +51,6 @@ class RandomSampling(Sampler):
     def sample(self, num_samples, ranges, sampler=np.random.rand):
         samples = sampler(num_samples, len(ranges))
         samples_scaled = self.scale_samples(samples, *ranges)
-        function_values = self.evaluate_function(samples_scaled)
         return samples_scaled
     
 
@@ -67,8 +61,7 @@ class MonteCarloSampling(Sampler):
 
     def sample(self, num_samples, ranges):
         samples = np.column_stack([np.random.uniform(*range, num_samples) for range in ranges])
-        function_values = self.evaluate_function(samples)
-        return samples, function_values
+        return samples
 
 
 
@@ -81,8 +74,7 @@ class SobolSequenceSampling(Sampler):
         sampler = qmc.Sobol(d=dimension, scramble=False)
         samples = sampler.random_base2(m=int(np.log2(num_samples)))
         samples_scaled = qmc.scale(samples, *ranges)
-        function_values = self.evaluate_function(samples_scaled)
-        return samples_scaled, function_values
+        return samples_scaled
     
 
 class HaltonSampling(Sampler):
@@ -94,8 +86,7 @@ class HaltonSampling(Sampler):
         sampler = qmc.Halton(d=dimension, scramble=False)
         samples = sampler.random(n=num_samples)
         samples_scaled = self.scale_samples(samples, *ranges)
-        function_values = self.evaluate_function(samples_scaled)
-        return samples_scaled, function_values
+        return samples_scaled
     
 
 class LatinHypercubeSampling(Sampler):
