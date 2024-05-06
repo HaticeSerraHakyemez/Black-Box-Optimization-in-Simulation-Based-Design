@@ -7,31 +7,57 @@ function_ranges = {
     "Drop Wave": [(-5.12, 5.12), (-5.12, 5.12)],
     "Eggholder": [(-512, 512), (-512, 512)],
     "Gramacy Lee": [(0.5, 2.5)],
-    "Griewank": [(-600, 600), (-600, 600)],
     "Holder Table": [(-10, 10), (-10, 10)],
-    "Rastrigin": [(-5.12, 5.12), (-5.12, 5.12)],
-    "Schaffer 2": [(-100, 100), (-100, 100)],
-    "Schaffer 4": [(-100, 100), (-100, 100)],
+    "Schaffer2": [(-100, 100), (-100, 100)],
+    "Schaffer4": [(-100, 100), (-100, 100)],
     "Schwefel": [(-500, 500), (-500, 500)],
     "Shubert": [(-10, 10), (-10, 10)],
     "Bohachevsky": [(-100, 100), (-100, 100)],
     "Rotated Hyper Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
     "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
-    "Sum of Different Powers": [(-1, 1)],
+    "Sum of Different Powers": [(-1, 1), (-1, 1)],
     "Sum Squares": [(-10, 10), (-10, 10)],
     "Trid": [(-10, 10), (-10, 10)],
     "Booth": [(-10, 10), (-10, 10)],
     "Matyas": [(-10, 10), (-10, 10)],
     "McCormick": [(-1.5, 4), (-3, 4)],
-    "Zakharov": [(-5, 10), (-5, 10)],
     "Three Hump Camel": [(-5, 5), (-5, 5)],
     "Six Hump Camel": [(-3, 3), (-2, 2)],
     "Dixon Price": [(-10, 10), (-10, 10)],
-    "De Jong 5": [(-65.536, 65.536), (-65.536, 65.536)],
     "Easom": [(-100, 100), (-100, 100)],
     "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
     "Branin": [(-5, 10), (0, 15)],
     "Colville": [(-10, 10), (-10, 10), (-10, 10), (-10, 10)]
+}
+
+function_mins = {
+    "Ackley": 0,
+    "Bukin": 0,
+    "Cross in Tray": -2.06261,
+    "Drop Wave": -1,
+    "Eggholder": -959.6407,
+    "Gramacy Lee": -0.869,
+    "Holder Table": -19.2085,
+    "Schaffer2": 0,
+    "Schaffer4": 0,
+    "Schwefel": 0,
+    "Shubert": -186.7309,
+    "Bohachevsky": 0,
+    "Rotated Hyper Ellipsoid": 0,
+    "Sphere": 0,
+    "Sum of Different Powers": 0,
+    "Sum Squares": 0,
+    "Trid": -50,
+    "Booth": 0,
+    "Matyas": 0,
+    "McCormick": -1.9132,
+    "Three Hump Camel": 0,
+    "Six Hump Camel": -1.03163,
+    "Dixon Price": 0,
+    "Easom": -1,
+    "Beale": 0,
+    "Branin": 0.3979,
+    "Colville": 0
 }
 
 
@@ -53,16 +79,10 @@ def eggholder(x):
     return -(x[1] + 47) * np.sin(np.sqrt(np.abs(x[0]/2 + (x[1] + 47)))) - x[0] * np.sin(np.sqrt(np.abs(x[0] - (x[1] + 47))))
 
 def gramacy_lee(x):
-    return np.sin(10*np.pi*x) / (2*x) + (x-1)**4
-
-def griewank(x):
-    return 1 + (1/4000)*np.sum(x**2) - np.prod(np.cos(x/np.sqrt(np.arange(0, x.size))))
+    return np.sin(10*np.pi*x[0]) / (2*x[0]) + (x[0]-1)**4
 
 def holder_table(x):
     return -np.abs(np.sin(x[0]) * np.cos(x[1]) * np.exp(np.abs(1 - np.sqrt(x[0]**2 + x[1]**2) / np.pi)))
-
-def rastrigin(x):
-    return 10 * len(x) + np.sum(x**2 - 10 * np.cos(2 * np.pi * x))
 
 def schaffer2(x):
     return 0.5 + ((np.sin(x[0]**2 - x[1]**2))**2 - 0.5) / ((1 + 0.001 * (x[0]**2 + x[1]**2))**2)
@@ -88,7 +108,7 @@ def sphere(x):
     return x[0]**2 + x[1]**2
 
 def sum_of_different_powers(x):
-    return np.abs(x[0]) + np.abs(x[1])
+    return np.abs(x[0])**2 + np.abs(x[1])**3
 
 def sum_squares(x):
     return 1 * x[0]**2 + 2 * x[1]**2
@@ -106,9 +126,6 @@ def matyas(x):
 def mccormick(x):
     return np.sin(x[0] + x[1]) + (x[0] - x[1])**2 - 1.5*x[0] + 2.5*x[1] + 1
 
-def zakharov(x):
-    return np.sum(x**2) + (0.5 * np.sum(x))**2 + (0.5 * np.sum(x))**4
-
 # Valley-Shaped
 def three_hump_camel(x):
     return 2*x[0]**2 - 1.05*x[0]**4 + (x[0]**6)/6 + x[0]*x[1] + x[1]**2
@@ -120,9 +137,6 @@ def dixon_price(x):
     return (x[0] - 1)**2 + np.sum([i * (2*x[i]**2 - x[i-1])**2 for i in range(0, len(x))])
 
 # Steep Ridges/Drops
-def de_jong5(x):
-    return np.sum(x**2)
-
 def easom(x):
     return -np.cos(x[0]) * np.cos(x[1]) * np.exp(-(x[0] - np.pi)**2 - (x[1] - np.pi)**2)
 

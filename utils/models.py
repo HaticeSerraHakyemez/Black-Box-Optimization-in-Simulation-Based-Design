@@ -56,10 +56,10 @@ class ActiveLearning:
             else:
                 increasing_error_count = 0
 
-            if increasing_error_count >= 3:  # Stop if validation error increases for three consecutive iterations
+            if increasing_error_count >= 10:  # Stop if validation error increases for three consecutive iterations
                 pass
-                #print("Stopping early due to increasing validation error.")
-                #break
+                print("Stopping early due to increasing validation error.")
+                break
 
             weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
             prev_val_error = curr_val_error
