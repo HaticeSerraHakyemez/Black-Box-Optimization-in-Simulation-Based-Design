@@ -3,19 +3,19 @@ import numpy as np
 function_ranges = {
     "Ackley": [(-32.768, 32.768), (-32.768, 32.768)],
     "Bukin": [(-15, -5), (-3, 3)],
-    "Cross-in-Tray": [(-10, 10), (-10, 10)],
-    "Drop-Wave": [(-5.12, 5.12), (-5.12, 5.12)],
+    "Cross in Tray": [(-10, 10), (-10, 10)],
+    "Drop Wave": [(-5.12, 5.12), (-5.12, 5.12)],
     "Eggholder": [(-512, 512), (-512, 512)],
-    "Gramacy & Lee": [(0.5, 2.5), (0.5, 2.5)],
+    "Gramacy Lee": [(0.5, 2.5)],
     "Griewank": [(-600, 600), (-600, 600)],
     "Holder Table": [(-10, 10), (-10, 10)],
     "Rastrigin": [(-5.12, 5.12), (-5.12, 5.12)],
-    "Schaffer Function N. 2": [(-100, 100), (-100, 100)],
-    "Schaffer Function N. 4": [(-100, 100), (-100, 100)],
+    "Schaffer 2": [(-100, 100), (-100, 100)],
+    "Schaffer 4": [(-100, 100), (-100, 100)],
     "Schwefel": [(-500, 500), (-500, 500)],
     "Shubert": [(-10, 10), (-10, 10)],
     "Bohachevsky": [(-100, 100), (-100, 100)],
-    "Rotated Hyper-Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
+    "Rotated Hyper Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
     "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
     "Sum of Different Powers": [(-1, 1)],
     "Sum Squares": [(-10, 10), (-10, 10)],
@@ -24,10 +24,10 @@ function_ranges = {
     "Matyas": [(-10, 10), (-10, 10)],
     "McCormick": [(-1.5, 4), (-3, 4)],
     "Zakharov": [(-5, 10), (-5, 10)],
-    "Three-Hump Camel": [(-5, 5), (-5, 5)],
-    "Six-Hump Camel": [(-3, 3), (-2, 2)],
-    "Dixon-Price": [(-10, 10), (-10, 10)],
-    "De Jong Function N. 5": [(-65.536, 65.536), (-65.536, 65.536)],
+    "Three Hump Camel": [(-5, 5), (-5, 5)],
+    "Six Hump Camel": [(-3, 3), (-2, 2)],
+    "Dixon Price": [(-10, 10), (-10, 10)],
+    "De Jong 5": [(-65.536, 65.536), (-65.536, 65.536)],
     "Easom": [(-100, 100), (-100, 100)],
     "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
     "Branin": [(-5, 10), (0, 15)],
@@ -93,7 +93,7 @@ def sum_of_different_powers(x):
 def sum_squares(x):
     return 1 * x[0]**2 + 2 * x[1]**2
 
-def trid_(x):
+def trid(x):
     return (x[0] - 1)**2 + (x[1] - 1)**2 - x[0] * x[1]
 
 # Plate-Shaped
