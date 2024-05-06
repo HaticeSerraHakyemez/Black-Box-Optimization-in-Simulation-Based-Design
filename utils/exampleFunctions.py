@@ -9,14 +9,12 @@ function_ranges = {
     "Gramacy & Lee": [(0.5, 2.5), (0.5, 2.5)],
     "Griewank": [(-600, 600), (-600, 600)],
     "Holder Table": [(-10, 10), (-10, 10)],
-    "Levy": [(-10, 10), (-10, 10)],
     "Rastrigin": [(-5.12, 5.12), (-5.12, 5.12)],
     "Schaffer Function N. 2": [(-100, 100), (-100, 100)],
     "Schaffer Function N. 4": [(-100, 100), (-100, 100)],
     "Schwefel": [(-500, 500), (-500, 500)],
     "Shubert": [(-10, 10), (-10, 10)],
     "Bohachevsky": [(-100, 100), (-100, 100)],
-    "Perm Function": [(0, 1)],
     "Rotated Hyper-Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
     "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
     "Sum of Different Powers": [(-1, 1)],
@@ -25,12 +23,10 @@ function_ranges = {
     "Booth": [(-10, 10), (-10, 10)],
     "Matyas": [(-10, 10), (-10, 10)],
     "McCormick": [(-1.5, 4), (-3, 4)],
-    "Power Sum": [(0, 1)],
     "Zakharov": [(-5, 10), (-5, 10)],
     "Three-Hump Camel": [(-5, 5), (-5, 5)],
     "Six-Hump Camel": [(-3, 3), (-2, 2)],
     "Dixon-Price": [(-10, 10), (-10, 10)],
-    "Rosenbrock": [(-2.048, 2.048), (-2.048, 2.048)],
     "De Jong Function N. 5": [(-65.536, 65.536), (-65.536, 65.536)],
     "Easom": [(-100, 100), (-100, 100)],
     "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
@@ -65,9 +61,6 @@ def griewank(x):
 def holder_table(x):
     return -np.abs(np.sin(x[0]) * np.cos(x[1]) * np.exp(np.abs(1 - np.sqrt(x[0]**2 + x[1]**2) / np.pi)))
 
-def levy(x):
-    return np.sum((1 + (x - 1) / 4) * (np.sin(np.pi * (1 + (x - 1) / 4)))**2) + (np.sin(2 * np.pi * (1 + (x[0] - 1) / 4)))**2
-
 def rastrigin(x):
     return 10 * len(x) + np.sum(x**2 - 10 * np.cos(2 * np.pi * x))
 
@@ -85,6 +78,25 @@ def shubert(x):
            np.prod([i * np.cos((i + 1) * x[1] + i) for i in range(1, 5 + 1)])
 
 # Bowl-Shaped
+def bohachevsky(x):
+    return x[0]**2 + 2*x[1]**2 - 0.3*np.cos(3*np.pi*x[0]) - 0.4*np.cos(4*np.pi*x[1]) + 0.7
+
+def rotated_hyper_ellipsoid(x):
+    return np.sum([(i + 1) * x[i - 1]**2 for i in range(1, 3)])
+
+def sphere(x):
+    return x[0]**2 + x[1]**2
+
+def sum_of_different_powers(x):
+    return np.abs(x[0]) + np.abs(x[1])
+
+def sum_squares(x):
+    return 1 * x[0]**2 + 2 * x[1]**2
+
+def trid_(x):
+    return (x[0] - 1)**2 + (x[1] - 1)**2 - x[0] * x[1]
+
+# Plate-Shaped
 def booth(x):
     return (x[0] + 2*x[1] - 7)**2 + (2*x[0] + x[1] - 5)**2
 
@@ -93,9 +105,6 @@ def matyas(x):
 
 def mccormick(x):
     return np.sin(x[0] + x[1]) + (x[0] - x[1])**2 - 1.5*x[0] + 2.5*x[1] + 1
-
-def power_sum(x, b=[8, 18, 44, 114, 274]):
-    return np.sum((x - np.array(b))**2)
 
 def zakharov(x):
     return np.sum(x**2) + (0.5 * np.sum(x))**2 + (0.5 * np.sum(x))**4

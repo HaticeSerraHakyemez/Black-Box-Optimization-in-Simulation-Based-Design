@@ -12,7 +12,7 @@ class Sampler:
         mesh_args = np.meshgrid(*[np.linspace(range[0], range[1], num_points) for range in ranges])
         if function:
             Z = function(mesh_args)
-            return (*mesh_args, Z)
+            return (mesh_args, Z)
         else:
             return mesh_args
 
