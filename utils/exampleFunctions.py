@@ -1,5 +1,53 @@
 import numpy as np
 
+function_ranges = {
+    "Ackley": [(-32.768, 32.768), (-32.768, 32.768)],
+    "Bukin": [(-15, -5), (-3, 3)],
+    "Cross-in-Tray": [(-10, 10), (-10, 10)],
+    "Drop-Wave": [(-5.12, 5.12), (-5.12, 5.12)],
+    "Eggholder": [(-512, 512), (-512, 512)],
+    "Gramacy & Lee": [(0.5, 2.5), (0.5, 2.5)],
+    "Griewank": [(-600, 600), (-600, 600)],
+    "Holder Table": [(-10, 10), (-10, 10)],
+    "Levy": [(-10, 10), (-10, 10)],
+    "Rastrigin": [(-5.12, 5.12), (-5.12, 5.12)],
+    "Schaffer Function N. 2": [(-100, 100), (-100, 100)],
+    "Schaffer Function N. 4": [(-100, 100), (-100, 100)],
+    "Schwefel": [(-500, 500), (-500, 500)],
+    "Shubert": [(-10, 10), (-10, 10)],
+    "Bohachevsky": [(-100, 100), (-100, 100)],
+    "Perm Function": [(0, 1)],
+    "Rotated Hyper-Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
+    "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
+    "Sum of Different Powers": [(-1, 1)],
+    "Sum Squares": [(-10, 10), (-10, 10)],
+    "Trid": [(-10, 10), (-10, 10)],
+    "Booth": [(-10, 10), (-10, 10)],
+    "Matyas": [(-10, 10), (-10, 10)],
+    "McCormick": [(-1.5, 4), (-3, 4)],
+    "Power Sum": [(0, 1)],
+    "Zakharov": [(-5, 10), (-5, 10)],
+    "Three-Hump Camel": [(-5, 5), (-5, 5)],
+    "Six-Hump Camel": [(-3, 3), (-2, 2)],
+    "Dixon-Price": [(-10, 10), (-10, 10)],
+    "Rosenbrock": [(-2.048, 2.048), (-2.048, 2.048)],
+    "De Jong Function N. 5": [(-65.536, 65.536), (-65.536, 65.536)],
+    "Easom": [(-100, 100), (-100, 100)],
+    "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
+    "Branin": [(-5, 10), (0, 15)],
+    "Colville": [(-10, 10), (-10, 10), (-10, 10), (-10, 10)],
+    "Forrester": [(0, 1)],
+    "Goldstein-Price": [(-2, 2), (-2, 2)],
+    "Hartmann 3-D": [(0, 1), (0, 1)],
+    "Hartmann 4-D": [(0, 1), (0, 1)],
+    "Hartmann 6-D": [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1), (0, 1)],
+    "Perm": [(0, 1)],
+    "Powell": [(-4, 5), (-4, 5), (-4, 5), (-4, 5)],
+    "Shekel": [(0, 10)],
+    "Styblinski-Tang": [(-5, 5), (-5, 5)]
+}
+
+
 # Many Local Minima
 def ackley(x):
     return -20 * np.exp(-0.2 * np.sqrt(0.5 * (x[0]**2 + x[1]**2))) - \
@@ -12,7 +60,7 @@ def cross_in_tray(x):
     return -0.0001 * (np.abs(np.sin(x[0]) * np.sin(x[1]) * np.exp(np.abs(100 - np.sqrt(x[0]**2 + x[1]**2) / np.pi))) + 1)**0.1
 
 def drop_wave(x):
-    return -(1 + np.cos(12 * np.sqrt(x[0]**2 + x[1]**2))) / (0.5 * (x[0]**2 + x[1]**2) + 2)
+    return -(1 + np.cos(12 * np.sqrt(x[0]**2 + x[1]**2))) / (0.5 * (x[0]**2 + x[1]**2) + 2) 
 
 def eggholder(x):
     return -(x[1] + 47) * np.sin(np.sqrt(np.abs(x[0]/2 + (x[1] + 47)))) - x[0] * np.sin(np.sqrt(np.abs(x[0] - (x[1] + 47))))
@@ -21,18 +69,13 @@ def gramacy_lee(x):
     return np.sin(10*np.pi*x) / (2*x) + (x-1)**4
 
 def griewank(x):
-    return 1 + (1/4000)*np.sum(x**2) - np.prod(np.cos(x/np.sqrt(np.arange(1, x.size + 1))))
+    return 1 + (1/4000)*np.sum(x**2) - np.prod(np.cos(x/np.sqrt(np.arange(0, x.size))))
 
 def holder_table(x):
     return -np.abs(np.sin(x[0]) * np.cos(x[1]) * np.exp(np.abs(1 - np.sqrt(x[0]**2 + x[1]**2) / np.pi)))
 
 def levy(x):
     return np.sum((1 + (x - 1) / 4) * (np.sin(np.pi * (1 + (x - 1) / 4)))**2) + (np.sin(2 * np.pi * (1 + (x[0] - 1) / 4)))**2
-
-def levy13(x):
-    w = 1 + (x - 1) / 4
-    return (np.sin(np.pi * w[0]))**2 + np.sum((w[:-1] - 1)**2 * (1 + 10 * (np.sin(np.pi * w[:-1] + 1))**2)) + \
-           (w[-1] - 1)**2 * (1 + (np.sin(2 * np.pi * w[-1]))**2)
 
 def rastrigin(x):
     return 10 * len(x) + np.sum(x**2 - 10 * np.cos(2 * np.pi * x))
@@ -47,8 +90,8 @@ def schwefel(x):
     return 418.9829 * len(x) - np.sum(x * np.sin(np.sqrt(np.abs(x))))
 
 def shubert(x):
-    return np.prod([i * np.sin((i + 1) * x[0] + i) for i in range(1, len(x) + 1)]) * \
-           np.prod([i * np.sin((2 * i) * x[1] + i) for i in range(1, len(x) + 1)])
+    return np.prod([i * np.cos((i + 1) * x[0] + i) for i in range(1, 5 + 1)]) * \
+           np.prod([i * np.cos((i + 1) * x[1] + i) for i in range(1, 5 + 1)])
 
 # Bowl-Shaped
 def booth(x):
@@ -74,10 +117,7 @@ def six_hump_camel(x):
     return (4 - 2.1*x[0]**2 + (x[0]**4)/3) * x[0]**2 + x[0]*x[1] + (-4 + 4*x[1]**2) * x[1]**2
 
 def dixon_price(x):
-    return (x[0] - 1)**2 + np.sum([i * (2*x[i]**2 - x[i-1])**2 for i in range(1, len(x))])
-
-def rosenbrock(x):
-    return np.sum(100*(x[1:] - x[:-1]**2)**2 + (1 - x[:-1])**2)
+    return (x[0] - 1)**2 + np.sum([i * (2*x[i]**2 - x[i-1])**2 for i in range(0, len(x))])
 
 # Steep Ridges/Drops
 def de_jong5(x):
@@ -85,9 +125,6 @@ def de_jong5(x):
 
 def easom(x):
     return -np.cos(x[0]) * np.cos(x[1]) * np.exp(-(x[0] - np.pi)**2 - (x[1] - np.pi)**2)
-
-def michalewicz(x, m=10):
-    return -np.sum(np.sin(x) * (np.sin(np.arange(1, len(x) + 1) * x**2 / np.pi)**(2*m)))
 
 # Other
 def beale(x):
