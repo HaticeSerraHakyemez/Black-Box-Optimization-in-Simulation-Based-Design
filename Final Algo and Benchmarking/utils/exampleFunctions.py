@@ -17,7 +17,7 @@ function_ranges = {
     "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
     "Sum of Different Powers": [(-1, 1)]*10,
     "Sum Squares": [(-10, 10), (-10, 10)],
-    "Trid": [(-10, 10), (-10, 10)],
+    "Trid": [(-4, 4), (-4, 4)],
     "Booth": [(-10, 10), (-10, 10)],
     "Matyas": [(-10, 10), (-10, 10)],
     "McCormick": [(-1.5, 4), (-3, 4)],
@@ -47,7 +47,7 @@ function_mins = {
     "Sphere": [0],
     "Sum of Different Powers": [0],
     "Sum Squares": [0],
-    "Trid": [-50],
+    "Trid": [-2],
     "Booth": [0],
     "Matyas": [0],
     "McCormick": [-1.9132],
@@ -58,6 +58,36 @@ function_mins = {
     "Beale": [0],
     "Branin": [0.3979],
     "Colville": [0]
+}
+
+function_averages = {
+    "Ackley": [20.184016689902684],
+    "Bukin": [122.93827786089152],
+    "Cross in Tray": [-1.5080556256149842],
+    "Drop Wave": [-0.13240531120099516],
+    "Eggholder": [-4.0381072959547195],
+    "Gramacy Lee": [0.7498897627053445],
+    "Holder Table": [-2.4347434680757276],
+    "Schaffer2": [0.49997554424776247],
+    "Schaffer4": [0.5081311855722545],
+    "Schwefel": [837.9657981056607],
+    "Shubert": [13.551891047763425],
+    "Bohachevsky": [10000.700033382931],
+    "Rotated Hyper Ellipsoid": [7158.278732991934],
+    "Sphere": [17.476266616726974],
+    "Sum of Different Powers": [1.603210678219104],
+    "Sum Squares": [99.99999934444095],
+    "Trid": [68.64032411334871],
+    "Booth": [407.26482606484245],
+    "Matyas": [17.33718060312489],
+    "McCormick": [7.532977376019472],
+    "Three Hump Camel": [265.7760381251709],
+    "Six Hump Camel": [20.160827134062878],
+    "Dixon Price": [80367.55730980658],
+    "Easom": [-4.7513579254349555e-05],
+    "Beale": [8551.108668923878],
+    "Branin": [54.31280812249516],
+    "Colville": [387103.1860940835]
 }
 
 
@@ -94,8 +124,8 @@ def schwefel(x):
     return 418.9829 * len(x) - np.sum(x * np.sin(np.sqrt(np.abs(x))))
 
 def shubert(x):
-    return np.prod([i * np.cos((i + 1) * x[0] + i) for i in range(1, 5 + 1)]) * \
-           np.prod([i * np.cos((i + 1) * x[1] + i) for i in range(1, 5 + 1)])
+    return np.sum([i * np.cos((i + 1) * x[0] + i) for i in range(1, 5 + 1)]) * \
+           np.sum([i * np.cos((i + 1) * x[1] + i) for i in range(1, 5 + 1)])   
 
 # Bowl-Shaped
 def bohachevsky(x):
