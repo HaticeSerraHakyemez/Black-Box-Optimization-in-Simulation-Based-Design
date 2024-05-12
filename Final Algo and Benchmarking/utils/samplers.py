@@ -3,6 +3,13 @@ from scipy.stats import qmc
 #from sklearn.model_selection import GridSearchCV
 import numpy as np
 
+def focused_grid_search(function, important_indices, ranges, num_points=20):
+    grid_ranges = [ranges[i] for i in important_indices]
+    grid = np.meshgrid(*[np.linspace(r[0], r[1], num_points) for r in grid_ranges])
+    grid = np.array(grid).reshape(len(important_indices), -1).T
+    evaluations = [function(row) for row in grid]
+    return grid[np.argmin(evaluations)], min(evaluations)
+
 class Sampler:
     def __init__(self, function):
         self.function = function
@@ -22,7 +29,7 @@ class Sampler:
 
     def evaluate_function(self, samples):
         return self.function(samples)
-    
+
    
 class GridSearch(Sampler):
     def __init__(self, function):

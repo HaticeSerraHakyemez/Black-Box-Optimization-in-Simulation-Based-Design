@@ -5,6 +5,8 @@ import pandas as pd
 def euclidean_distance(p):
     return np.sqrt(np.sum((p[0] - p[1]) ** 2))
 
+def important_features(importances, threshold=0.3):
+    return [i for i, imp in enumerate(importances) if imp > threshold]
 
 class SamplingVisualization:
     def __init__(self, initial_points, new_points_all, min_function_values, improvement):

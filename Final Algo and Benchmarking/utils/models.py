@@ -6,7 +6,8 @@ from skopt import gp_minimize
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import Matern
 from sklearn.linear_model import LinearRegression
-
+import utils.generalDefinitions as gen_def
+import utils.samplers as samplers
 
 class ActiveLearning:
     def __init__(self, initial_points, initial_values, model, sampling_strategy, num_iterations=1000, tolerance=0.15):
@@ -30,7 +31,10 @@ class ActiveLearning:
         w_uncertainty = remaining_weight / 2
         return (w_distance, w_uncertainty, w_prediction)    
 
-    def run_active_learning(self, num_samples, ranges, k):
+    def run_active_learning(self, num_samples, ranges, k, function):
+        
+        importances = self.model.get_feature_importances()
+        important_inds = gen_def.important_features(importances)
 
         # Initialize lists to track performance metrics
         min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
@@ -73,6 +77,7 @@ class ActiveLearning:
             
             # Generate new candidate samples using sampling strategy
             new_points = self.sampling_strategy.sample(num_samples, ranges)
+            #new_points, optimal_value = samplers.focused_grid_search(function, important_inds, ranges)
 
             # Calculate distance score based on distances
             distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
@@ -119,7 +124,10 @@ class ActiveLearning:
 
                 # Re-fit the model including the new points
                 iter_to_train = 0
-                self.model.train_model(samples, sample_values)
+                self.model.fit(samples, sample_values)
+                importances = self.model.get_feature_importances()
+                important_inds = gen_def.important_features(importances)
+
 
             # Calculate improvement
             rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
@@ -390,6 +398,20 @@ class RandomForestModel:
 
     def get_model(self):
         return self.rf_model
+    
+
+class CustomRandomForest:
+    def __init__(self, **kwargs):
+        self.model = RandomForestRegressor(**kwargs)
+
+    def fit(self, X, y):
+        self.model.fit(X, y)
+
+    def get_feature_importances(self):
+        return self.model.feature_importances_
+    
+    def get_model(self):
+        return self.model
     
 
 class LinearRegressionModel:
