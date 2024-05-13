@@ -24,7 +24,6 @@ function_ranges = {
     "Three Hump Camel": [(-5, 5), (-5, 5)],
     "Six Hump Camel": [(-3, 3), (-2, 2)],
     "Dixon Price": [(-10, 10)]*5,
-    "Easom": [(-100, 100), (-100, 100)],
     "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
     "Branin": [(-5, 10), (0, 15)],
     "Colville": [(-10, 10), (-10, 10), (-10, 10), (-10, 10)]
@@ -39,7 +38,7 @@ function_mins = {
     "Gramacy Lee": [-0.869],
     "Holder Table": [-19.2085],
     "Schaffer2": [0],
-    "Schaffer4": [0],
+    "Schaffer4": [0.2926],
     "Schwefel": [0],
     "Shubert": [-186.7309],
     "Bohachevsky": [0],
@@ -54,7 +53,6 @@ function_mins = {
     "Three Hump Camel": [0],
     "Six Hump Camel": [-1.03163],
     "Dixon Price": [0],
-    "Easom": [-1],
     "Beale": [0],
     "Branin": [0.3979],
     "Colville": [0]
@@ -84,7 +82,6 @@ function_averages = {
     "Three Hump Camel": [265.7760381251709],
     "Six Hump Camel": [20.160827134062878],
     "Dixon Price": [80367.55730980658],
-    "Easom": [-4.7513579254349555e-05],
     "Beale": [8551.108668923878],
     "Branin": [54.31280812249516],
     "Colville": [387103.1860940835]
@@ -169,10 +166,6 @@ def six_hump_camel(x):
 
 def dixon_price(x):
     return (x[0] - 1)**2 + np.sum([i * (2*x[i]**2 - x[i-1])**2 for i in range(1, len(x))])
-
-# Steep Ridges/Drops
-def easom(x):
-    return -np.cos(x[0]) * np.cos(x[1]) * np.exp(-(x[0] - np.pi)**2 - (x[1] - np.pi)**2)
 
 # Other
 def beale(x):
