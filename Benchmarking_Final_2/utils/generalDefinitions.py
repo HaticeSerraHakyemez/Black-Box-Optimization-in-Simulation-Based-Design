@@ -10,7 +10,7 @@ def distance_btw_two_points(p1, p2):
         flag = len(p1[0])
         result = []
         for j in range(len(p1)):
-            result.append(np.sqrt(np.sum([(p1[j][i] - p2[i]) ** 2 for i in range(len(p1))])))
+            result.append(np.sqrt(np.sum([(p1[j][i] - p2[i]) ** 2 for i in range(len(p1[j]))])))
 
         return np.min(result)
     
