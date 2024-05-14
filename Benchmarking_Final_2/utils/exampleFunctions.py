@@ -15,7 +15,7 @@ function_ranges = {
     "Bohachevsky": [(-100, 100), (-100, 100)],
     "Rotated Hyper Ellipsoid": [(-65.536, 65.536), (-65.536, 65.536)],
     "Sphere": [(-5.12, 5.12), (-5.12, 5.12)],
-    "Sum of Different Powers": [(-1, 1)]*10,
+    "Sum of Different Powers": [(-1, 1)] * 10,
     "Sum Squares": [(-10, 10), (-10, 10)],
     "Trid": [(-4, 4), (-4, 4)],
     "Booth": [(-10, 10), (-10, 10)],
@@ -23,7 +23,7 @@ function_ranges = {
     "McCormick": [(-1.5, 4), (-3, 4)],
     "Three Hump Camel": [(-5, 5), (-5, 5)],
     "Six Hump Camel": [(-3, 3), (-2, 2)],
-    "Dixon Price": [(-10, 10)]*5,
+    "Dixon Price": [(-10, 10)] * 5,
     "Beale": [(-4.5, 4.5), (-4.5, 4.5)],
     "Branin": [(-5, 10), (0, 15)],
     "Colville": [(-10, 10), (-10, 10), (-10, 10), (-10, 10)]
@@ -57,6 +57,36 @@ function_mins = {
     "Branin": [0.3979],
     "Colville": [0]
 }
+
+function_min_inputs = {
+    "Ackley": [0, 0],
+    "Bukin": [-10, 1],
+    "Cross in Tray": [[1.34941, -1.34941], [-1.34941, -1.34941], [1.34941, 1.34941], [-1.34941, 1.34941]],  #multiple global optima
+    "Drop Wave": [0, 0],
+    "Eggholder": [512, 404.2319],
+    "Gramacy Lee": [0.548563],
+    "Holder Table": [[8.05502, 9.66459], [-8.05502, 9.66459], [8.05502, -9.66459], [-8.05502, -9.66459]],  #multiple global optima
+    "Schaffer2": [0, 0],
+    "Schaffer4": [0, 1.25313],
+    "Schwefel": [420.9687, 420.9687],  
+    "Shubert": [-7.0835, -7.7083],
+    "Bohachevsky": [0, 0],
+    "Rotated Hyper Ellipsoid": [0, 0],  
+    "Sphere": [0, 0],  
+    "Sum of Different Powers": [0] * 10,  
+    "Sum Squares": [0, 0], 
+    "Trid": [1, 2], 
+    "Booth": [1, 3],
+    "Matyas": [0, 0],
+    "McCormick": [-0.54719, -1.54719],
+    "Three Hump Camel": [0, 0],
+    "Six Hump Camel": [[0.0898, -0.7126], [-0.0898, 0.7126]], #multiple global optima
+    "Dixon Price": [1.0, 0.7071, 0.5946, 0.5452, 0.5221], 
+    "Beale": [3, 0.5],
+    "Branin": [[3.14159, 2.275], [-3.14159, 12.275], [9.42478, 2.475]], #multiple global optima
+    "Colville": [1] * 4
+}
+
 
 function_averages = {
     "Ackley": [20.184016689902684],

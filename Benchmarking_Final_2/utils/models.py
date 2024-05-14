@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 
 
 class ActiveLearning:
-    def __init__(self, initial_points, initial_values, model, sampling_strategy, num_iterations=1000, tolerance=0.15):
+    def __init__(self, initial_points, initial_values, model, sampling_strategy, num_iterations=100, tolerance=0.15):
         self.initial_points = initial_points
         self.initial_values = initial_values
         self.model = model
@@ -164,6 +164,8 @@ class ActiveLearning:
 
         current_min_iter = 1
 
+        min_function_params = self.initial_points[np.argmin(self.initial_values)]
+
         for iteration in range(self.num_iterations):
 
             if(iteration>99):
@@ -232,6 +234,7 @@ class ActiveLearning:
             if(iteration > 0):
                 if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
                     current_min_iter = iteration
+                    min_function_params = samples[np.argmin(sample_values)]
 
             min_function_values.append(np.min(sample_values))
 
@@ -256,236 +259,9 @@ class ActiveLearning:
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
 
-        return min_function_values, improvement, new_points_all, iteration, current_min_iter
+        return min_function_params, min_function_values, improvement, new_points_all, iteration, current_min_iter
     
-    def run_active_learning_constant_iterations_50(self, num_samples, ranges, k):
 
-        # Initialize lists to track performance metrics
-        min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
-        improvement = []
-        new_points_all = []  # Store all the new points generated
-
-        # Run active learning loop
-        samples = self.initial_points
-        sample_values = self.initial_values
-
-        prev_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
-        weights = (0.33, 0.33, 0.34)
-        val_errors = []
-        increasing_error_count = 0  # To monitor increasing validation errors
-
-        iter_to_train = 0
-
-        current_min_iter = 1
-
-        for iteration in range(self.num_iterations):
-
-            if(iteration>49):
-                break
-
-            curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
-            if curr_val_error > prev_val_error:
-                increasing_error_count += 1
-            else:
-                increasing_error_count = 0
-
-            if increasing_error_count >= 10:  # Stop if validation error increases for three consecutive iterations
-                pass
-                print("Stopping early due to increasing validation error.")
-                break
-
-            weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
-            #weights = (0.5, 0, 0.7)
-            prev_val_error = curr_val_error
-            val_errors.append(curr_val_error)
-            
-            iter_to_train+= 1
-            
-            # Generate new candidate samples using sampling strategy
-            new_points = self.sampling_strategy.sample(num_samples, ranges)
-
-            # Calculate distance score based on distances
-            distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
-            max_distance = np.max(distances_to_existing)
-            distance_scores = 1 - distances_to_existing / max_distance
-
-            # Predict uncertainty score based on model variance
-            variance = np.var([tree.predict(new_points) for tree in self.model.get_model().estimators_], axis=0)
-            uncertainty_scores = 1 - variance / np.max(variance)
-
-            # Predict values for the candidate samples
-            predicted_values = self.model.get_model().predict(new_points)
-
-            # Normalize the predicted values between 0 and 1 using Min-Max normalization
-            min_predicted_value = np.min(predicted_values)
-            max_predicted_value = np.max(predicted_values)
-            predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
-
-            # Calculate joint scores
-            #0 ÇARPANINI UNUTMA
-            joint_scores = weights[0]*distance_scores + weights[1]*uncertainty_scores + weights[2]*predicted_score
-
-            # Find the index of the point with the maximum joint score
-            index_of_max_joint_score = np.argmin(joint_scores)
-
-            # The point with the maximum joint score
-            chosen_new_point = new_points[index_of_max_joint_score]
-
-            # Update the model with the new point
-            chosen_new_value = np.array([self.sampling_strategy.evaluate_function(chosen_new_point)])
-            
-
-            # Update training data
-            new_points_all = np.vstack([samples, chosen_new_point])
-            new_values_all = np.append(sample_values, chosen_new_value)
-
-            # Sort the values in descending order
-            new_values_all.sort()
-
-            # Keep track of the minimum function value observed so far
-            if(iteration > 0):
-                if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
-                    current_min_iter = iteration
-
-            min_function_values.append(np.min(sample_values))
-
-            if(iter_to_train == k):    
-
-                # Re-fit the model including the new points
-                iter_to_train = 0
-                self.model.train_model(samples, sample_values)
-
-            # Calculate improvement
-            rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
-            improvement.append(rmse)
-
-            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
-            #print('weights:',weights)
-
-            # Check for convergence (change in function value less than the tolerance)
-            #if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-             #   print(f"Convergence reached at iteration {iteration + 1}.")
-              #  break
-            samples = np.vstack([samples, chosen_new_point])
-            sample_values = np.append(sample_values, chosen_new_value)
-        iteration = iteration + 1
-
-        return min_function_values, improvement, new_points_all, iteration, current_min_iter 
-    
-    def run_active_learning_constant_iterations_25(self, num_samples, ranges, k):
-
-        # Initialize lists to track performance metrics
-        min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
-        improvement = []
-        new_points_all = []  # Store all the new points generated
-
-        # Run active learning loop
-        samples = self.initial_points
-        sample_values = self.initial_values
-
-        prev_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
-        weights = (0.33, 0.33, 0.34)
-        val_errors = []
-        increasing_error_count = 0  # To monitor increasing validation errors
-
-        iter_to_train = 0
-
-        current_min_iter = 1
-
-        for iteration in range(self.num_iterations):
-
-            if(iteration>24):
-                break
-
-            curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
-            if curr_val_error > prev_val_error:
-                increasing_error_count += 1
-            else:
-                increasing_error_count = 0
-
-            if increasing_error_count >= 10:  # Stop if validation error increases for three consecutive iterations
-                pass
-                print("Stopping early due to increasing validation error.")
-                break
-
-            weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
-            #weights = (0.5, 0, 0.7)
-            prev_val_error = curr_val_error
-            val_errors.append(curr_val_error)
-            
-            iter_to_train+= 1
-            
-            # Generate new candidate samples using sampling strategy
-            new_points = self.sampling_strategy.sample(num_samples, ranges)
-
-            # Calculate distance score based on distances
-            distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
-            max_distance = np.max(distances_to_existing)
-            distance_scores = 1 - distances_to_existing / max_distance
-
-            # Predict uncertainty score based on model variance
-            variance = np.var([tree.predict(new_points) for tree in self.model.get_model().estimators_], axis=0)
-            uncertainty_scores = 1 - variance / np.max(variance)
-
-            # Predict values for the candidate samples
-            predicted_values = self.model.get_model().predict(new_points)
-
-            # Normalize the predicted values between 0 and 1 using Min-Max normalization
-            min_predicted_value = np.min(predicted_values)
-            max_predicted_value = np.max(predicted_values)
-            predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
-
-            # Calculate joint scores
-            #0 ÇARPANINI UNUTMA
-            joint_scores = weights[0]*distance_scores + weights[1]*uncertainty_scores + weights[2]*predicted_score
-
-            # Find the index of the point with the maximum joint score
-            index_of_max_joint_score = np.argmin(joint_scores)
-
-            # The point with the maximum joint score
-            chosen_new_point = new_points[index_of_max_joint_score]
-
-            # Update the model with the new point
-            chosen_new_value = np.array([self.sampling_strategy.evaluate_function(chosen_new_point)])
-            
-
-            # Update training data
-            new_points_all = np.vstack([samples, chosen_new_point])
-            new_values_all = np.append(sample_values, chosen_new_value)
-
-            # Sort the values in descending order
-            new_values_all.sort()
-
-            # Keep track of the minimum function value observed so far
-            if(iteration > 0):
-                if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
-                    current_min_iter = iteration
-                
-            min_function_values.append(np.min(sample_values))
-
-            if(iter_to_train == k):    
-
-                # Re-fit the model including the new points
-                iter_to_train = 0
-                self.model.train_model(samples, sample_values)
-
-            # Calculate improvement
-            rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
-            improvement.append(rmse)
-
-            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
-            #print('weights:',weights)
-
-            # Check for convergence (change in function value less than the tolerance)
-            #if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-             #   print(f"Convergence reached at iteration {iteration + 1}.")
-              #  break
-            samples = np.vstack([samples, chosen_new_point])
-            sample_values = np.append(sample_values, chosen_new_value)
-        iteration = iteration + 1
-
-        return min_function_values, improvement, new_points_all, iteration, current_min_iter
-    
     def run_active_learning_constant_iterations_15(self, num_samples, ranges, k):
 
         # Initialize lists to track performance metrics
@@ -505,6 +281,8 @@ class ActiveLearning:
         iter_to_train = 0
 
         current_min_iter = 1
+
+        min_function_params = self.initial_points[np.argmin(self.initial_values)]
 
         for iteration in range(self.num_iterations):
 
@@ -574,6 +352,7 @@ class ActiveLearning:
             if(iteration > 0):
                 if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
                     current_min_iter = iteration
+                    min_function_params = samples[np.argmin(sample_values)]
 
             min_function_values.append(np.min(sample_values))
 
@@ -598,7 +377,241 @@ class ActiveLearning:
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
 
-        return min_function_values, improvement, new_points_all, iteration, current_min_iter
+        return min_function_params, min_function_values, improvement, new_points_all, iteration, current_min_iter
+    
+    def run_active_learning_constant_iterations_25(self, num_samples, ranges, k):
+
+        # Initialize lists to track performance metrics
+        min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
+        improvement = []
+        new_points_all = []  # Store all the new points generated
+
+        # Run active learning loop
+        samples = self.initial_points
+        sample_values = self.initial_values
+
+        prev_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+        weights = (0.33, 0.33, 0.34)
+        val_errors = []
+        increasing_error_count = 0  # To monitor increasing validation errors
+
+        iter_to_train = 0
+
+        current_min_iter = 1
+
+        min_function_params = self.initial_points[np.argmin(self.initial_values)]
+
+        for iteration in range(self.num_iterations):
+
+            if(iteration>24):
+                break
+
+            curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+            if curr_val_error > prev_val_error:
+                increasing_error_count += 1
+            else:
+                increasing_error_count = 0
+
+            if increasing_error_count >= 10:  # Stop if validation error increases for three consecutive iterations
+                pass
+                print("Stopping early due to increasing validation error.")
+                break
+
+            weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
+            #weights = (0.5, 0, 0.7)
+            prev_val_error = curr_val_error
+            val_errors.append(curr_val_error)
+            
+            iter_to_train+= 1
+            
+            # Generate new candidate samples using sampling strategy
+            new_points = self.sampling_strategy.sample(num_samples, ranges)
+
+            # Calculate distance score based on distances
+            distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
+            max_distance = np.max(distances_to_existing)
+            distance_scores = 1 - distances_to_existing / max_distance
+
+            # Predict uncertainty score based on model variance
+            variance = np.var([tree.predict(new_points) for tree in self.model.get_model().estimators_], axis=0)
+            uncertainty_scores = 1 - variance / np.max(variance)
+
+            # Predict values for the candidate samples
+            predicted_values = self.model.get_model().predict(new_points)
+
+            # Normalize the predicted values between 0 and 1 using Min-Max normalization
+            min_predicted_value = np.min(predicted_values)
+            max_predicted_value = np.max(predicted_values)
+            predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
+
+            # Calculate joint scores
+            #0 ÇARPANINI UNUTMA
+            joint_scores = weights[0]*distance_scores + weights[1]*uncertainty_scores + weights[2]*predicted_score
+
+            # Find the index of the point with the maximum joint score
+            index_of_max_joint_score = np.argmin(joint_scores)
+
+            # The point with the maximum joint score
+            chosen_new_point = new_points[index_of_max_joint_score]
+
+            # Update the model with the new point
+            chosen_new_value = np.array([self.sampling_strategy.evaluate_function(chosen_new_point)])
+            
+
+            # Update training data
+            new_points_all = np.vstack([samples, chosen_new_point])
+            new_values_all = np.append(sample_values, chosen_new_value)
+
+            # Sort the values in descending order
+            new_values_all.sort()
+
+            # Keep track of the minimum function value observed so far
+            if(iteration > 0):
+                if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
+                    current_min_iter = iteration
+                    min_function_params = samples[np.argmin(sample_values)]
+
+            min_function_values.append(np.min(sample_values))
+
+            if(iter_to_train == k):    
+
+                # Re-fit the model including the new points
+                iter_to_train = 0
+                self.model.train_model(samples, sample_values)
+
+            # Calculate improvement
+            rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
+            improvement.append(rmse)
+
+            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
+            #print('weights:',weights)
+
+            # Check for convergence (change in function value less than the tolerance)
+            #if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+             #   print(f"Convergence reached at iteration {iteration + 1}.")
+              #  break
+            samples = np.vstack([samples, chosen_new_point])
+            sample_values = np.append(sample_values, chosen_new_value)
+        iteration = iteration + 1
+
+        return min_function_params, min_function_values, improvement, new_points_all, iteration, current_min_iter
+    
+    def run_active_learning_constant_iterations_50(self, num_samples, ranges, k):
+
+        # Initialize lists to track performance metrics
+        min_function_values = [np.min(self.initial_values)]  # Track min function value for each iteration
+        improvement = []
+        new_points_all = []  # Store all the new points generated
+
+        # Run active learning loop
+        samples = self.initial_points
+        sample_values = self.initial_values
+
+        prev_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+        weights = (0.33, 0.33, 0.34)
+        val_errors = []
+        increasing_error_count = 0  # To monitor increasing validation errors
+
+        iter_to_train = 0
+
+        current_min_iter = 1
+
+        min_function_params = self.initial_points[np.argmin(self.initial_values)]
+
+        for iteration in range(self.num_iterations):
+
+            if(iteration>49):
+                break
+
+            curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
+            if curr_val_error > prev_val_error:
+                increasing_error_count += 1
+            else:
+                increasing_error_count = 0
+
+            if increasing_error_count >= 10:  # Stop if validation error increases for three consecutive iterations
+                pass
+                print("Stopping early due to increasing validation error.")
+                break
+
+            weights = self.adjust_weights(weights, iteration, self.num_iterations, prev_val_error, curr_val_error)
+            #weights = (0.5, 0, 0.7)
+            prev_val_error = curr_val_error
+            val_errors.append(curr_val_error)
+            
+            iter_to_train+= 1
+            
+            # Generate new candidate samples using sampling strategy
+            new_points = self.sampling_strategy.sample(num_samples, ranges)
+
+            # Calculate distance score based on distances
+            distances_to_existing = np.array([[min([func_def.euclidean_distance([new_point, sample]) for sample in samples]) for new_point in new_points]])
+            max_distance = np.max(distances_to_existing)
+            distance_scores = 1 - distances_to_existing / max_distance
+
+            # Predict uncertainty score based on model variance
+            variance = np.var([tree.predict(new_points) for tree in self.model.get_model().estimators_], axis=0)
+            uncertainty_scores = 1 - variance / np.max(variance)
+
+            # Predict values for the candidate samples
+            predicted_values = self.model.get_model().predict(new_points)
+
+            # Normalize the predicted values between 0 and 1 using Min-Max normalization
+            min_predicted_value = np.min(predicted_values)
+            max_predicted_value = np.max(predicted_values)
+            predicted_score = (predicted_values - min_predicted_value) / (max_predicted_value - min_predicted_value)
+
+            # Calculate joint scores
+            #0 ÇARPANINI UNUTMA
+            joint_scores = weights[0]*distance_scores + weights[1]*uncertainty_scores + weights[2]*predicted_score
+
+            # Find the index of the point with the maximum joint score
+            index_of_max_joint_score = np.argmin(joint_scores)
+
+            # The point with the maximum joint score
+            chosen_new_point = new_points[index_of_max_joint_score]
+
+            # Update the model with the new point
+            chosen_new_value = np.array([self.sampling_strategy.evaluate_function(chosen_new_point)])
+            
+
+            # Update training data
+            new_points_all = np.vstack([samples, chosen_new_point])
+            new_values_all = np.append(sample_values, chosen_new_value)
+
+            # Sort the values in descending order
+            new_values_all.sort()
+
+            # Keep track of the minimum function value observed so far
+            if(iteration > 0):
+                if(np.min(sample_values) < min_function_values[len(min_function_values)-1]):
+                    current_min_iter = iteration
+                    min_function_params = samples[np.argmin(sample_values)]
+
+            min_function_values.append(np.min(sample_values))
+
+            if(iter_to_train == k):    
+
+                # Re-fit the model including the new points
+                iter_to_train = 0
+                self.model.train_model(samples, sample_values)
+
+            # Calculate improvement
+            rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
+            improvement.append(rmse)
+
+            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
+            #print('weights:',weights)
+
+            # Check for convergence (change in function value less than the tolerance)
+            #if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+             #   print(f"Convergence reached at iteration {iteration + 1}.")
+              #  break
+            samples = np.vstack([samples, chosen_new_point])
+            sample_values = np.append(sample_values, chosen_new_value)
+        iteration = iteration + 1
+
+        return min_function_params, min_function_values, improvement, new_points_all, iteration, current_min_iter
     
     def run_active_learning_no_prediction(self, num_samples, ranges, k):
 

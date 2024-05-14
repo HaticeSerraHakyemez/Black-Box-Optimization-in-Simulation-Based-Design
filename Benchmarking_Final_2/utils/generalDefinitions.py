@@ -5,6 +5,24 @@ import pandas as pd
 def euclidean_distance(p):
     return np.sqrt(np.sum((p[0] - p[1]) ** 2))
 
+def distance_btw_two_points(p1, p2):
+    try:
+        flag = len(p1[0])
+        result = []
+        for j in range(len(p1)):
+            result.append(np.sqrt(np.sum([(p1[j][i] - p2[i]) ** 2 for i in range(len(p1))])))
+
+        return np.min(result)
+    
+    except Exception as e:
+        return np.sqrt(np.sum([(p1[i] - p2[i]) ** 2 for i in range(len(p1))]))
+
+def grid_diagonal_distance(edges):
+    d = len(edges)
+    result = 0
+    for i in range(d):
+        result += (edges[i][0] - edges[i][1]) ** 2
+    return np.sqrt(result)
 
 class SamplingVisualization:
     def __init__(self, initial_points, new_points_all, min_function_values, improvement):
