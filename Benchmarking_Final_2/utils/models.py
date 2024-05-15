@@ -134,10 +134,10 @@ class ActiveLearning:
             print(f"Iteration {iteration + 1}, RMSE: {rmse}")
             print('weights:',weights)
 
-            # Check for convergence (change in function value less than the tolerance)
-            if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
-                break
+            # # Check for convergence (change in function value less than the tolerance)
+            # if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+            #     print(f"Convergence reached at iteration {iteration + 1}.")
+            #     break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
@@ -720,9 +720,9 @@ class ActiveLearning:
             print('weights:',weights)
 
             # Check for convergence (change in function value less than the tolerance)
-            if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
-                break
+            # if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+            #     print(f"Convergence reached at iteration {iteration + 1}.")
+            #     break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
@@ -838,10 +838,10 @@ class ActiveLearning:
             #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
             #print('weights:',weights)
 
-            # Check for convergence (change in function value less than the tolerance)
-            if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
-                break
+            # # Check for convergence (change in function value less than the tolerance)
+            # if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+            #     print(f"Convergence reached at iteration {iteration + 1}.")
+            #     break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
@@ -959,9 +959,9 @@ class ActiveLearning:
             #print('weights:',weights)
 
             # Check for convergence (change in function value less than the tolerance)
-            if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
-                break
+            # if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+            #     print(f"Convergence reached at iteration {iteration + 1}.")
+            #     break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
@@ -1078,9 +1078,9 @@ class ActiveLearning:
             #print('weights:',weights)
 
             # Check for convergence (change in function value less than the tolerance)
-            if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
-                break
+            # if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
+            #     print(f"Convergence reached at iteration {iteration + 1}.")
+            #     break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
         iteration = iteration + 1
