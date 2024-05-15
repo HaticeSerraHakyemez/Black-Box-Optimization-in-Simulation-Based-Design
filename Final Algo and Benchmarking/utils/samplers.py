@@ -1,0 +1,161 @@
+import numpy as np
+from scipy.stats import qmc
+#from sklearn.model_selection import GridSearchCV
+import numpy as np
+
+def focused_grid_search(function, important_indices, ranges, num_points=20):
+    grid_ranges = [ranges[i] for i in important_indices]
+    grid = np.meshgrid(*[np.linspace(r[0], r[1], num_points) for r in grid_ranges])
+    grid = np.array(grid).reshape(len(important_indices), -1).T
+    evaluations = [function(row) for row in grid]
+    return grid[np.argmin(evaluations)], min(evaluations)
+
+class Sampler:
+    def __init__(self, function):
+        self.function = function
+
+    @staticmethod
+    def generate_mesh(ranges, num_points=100, function=None):
+        mesh_args = np.meshgrid(*[np.linspace(range[0], range[1], num_points) for range in ranges])
+        if function:
+            Z = function(mesh_args)
+            return (mesh_args, Z)
+        else:
+            return mesh_args
+
+    def scale_samples(self, samples, *ranges):
+        scaled_samples = (samples * np.array([range[1] - range[0] for range in ranges])) + np.array([range[0] for range in ranges])
+        return scaled_samples
+
+    def evaluate_function(self, samples):
+        return self.function(samples)
+
+   
+class GridSearch(Sampler):
+    def __init__(self, function=None):
+        super().__init__(function=None)
+
+    def sample(self, num_samples_per_dimension, ranges, importances):
+        if importances is None:
+            raise ValueError("Feature importances not computed. Call compute_feature_importances first.")
+
+        # Use self.feature_importances directly here
+        adjusted_samples_per_dimension = [
+            int(num_samples_per_dimension * 1.5 if imp > 0.3 else num_samples_per_dimension * 0.5)
+            for imp in importances  # Correct access to the attribute
+        ]
+
+        # Generate grid with varying density
+        grids = [np.linspace(range_[0], range_[1], num_points)
+                 for range_, num_points in zip(ranges, adjusted_samples_per_dimension)]
+        mesh_args = np.meshgrid(*grids, indexing='ij')
+        grid_points = np.array([arg.flatten() for arg in mesh_args]).T
+
+        # Scale samples to ensure they fit within the defined ranges
+        scaled_samples = np.zeros_like(grid_points)
+        for i, (low, high) in enumerate(ranges):
+            scaled_samples[:, i] = grid_points[:, i] * (high - low) + low
+
+        return scaled_samples
+
+
+class LatinHypercubeSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        dimension = len(ranges)
+        sampler = qmc.LatinHypercube(d=dimension)
+        samples = sampler.random(n=num_samples)
+        scaled_samples = self.scale_samples(samples, *ranges)
+        return scaled_samples
+    
+
+class RandomSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges, sampler=np.random.rand):
+        samples = sampler(num_samples, len(ranges))
+        samples_scaled = self.scale_samples(samples, *ranges)
+        return samples_scaled
+    
+
+
+class MonteCarloSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        samples = np.column_stack([np.random.uniform(*range, num_samples) for range in ranges])
+        return samples
+
+
+
+class SobolSequenceSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        dimension = len(ranges)
+        sampler = qmc.Sobol(d=dimension, scramble=False)
+        samples = sampler.random_base2(m=int(np.log2(num_samples)))
+        samples_scaled = qmc.scale(samples, *ranges)
+        return samples_scaled
+    
+
+class HaltonSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        dimension = len(ranges)
+        sampler = qmc.Halton(d=dimension, scramble=False)
+        samples = sampler.random(n=num_samples)
+        samples_scaled = self.scale_samples(samples, *ranges)
+        return samples_scaled
+    
+
+class LatinHypercubeSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def sample(self, num_samples, ranges):
+        dimension = len(ranges)
+        sampler = qmc.LatinHypercube(d=dimension)
+        samples = sampler.random(n=num_samples)
+        scaled_samples = self.scale_samples(samples, *ranges)
+        return scaled_samples
+    
+    
+class AdaptiveSampling(Sampler):
+    def __init__(self, function):
+        super().__init__(function)
+
+    def initial_samples(self, num_samples=20, *ranges):
+        sampler = LatinHypercubeSampling(self.function)
+        samples = sampler.sample(num_samples, *ranges)
+        return samples
+
+    def sample(self, initial_samples, iterations=5, samples_per_iter=10):
+        min_values = np.min(initial_samples, axis=0)
+        max_values = np.max(initial_samples, axis=0)
+        current_samples = initial_samples
+        for _ in range(iterations):
+            function_values = self.evaluate_function(current_samples)
+            # Indices of points with highest absolute values (proxy for interest)
+            top_indices = np.argsort(np.abs(function_values))[-10:]
+            top_samples = current_samples[top_indices]
+
+            # Generate new samples around these points
+            new_samples = []
+            for sample in top_samples:
+                new_samples.append(np.random.uniform(low=sample-50, high=sample+50, size=(samples_per_iter, len(sample))))
+            new_samples = np.array(new_samples).reshape(-1, len(sample))
+            new_samples = np.clip(new_samples, min_values, max_values)
+
+            # Add new samples to the current set
+            current_samples = np.vstack((current_samples, new_samples))
+
+        return current_samples
+    
