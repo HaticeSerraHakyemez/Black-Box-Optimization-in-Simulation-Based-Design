@@ -125,12 +125,12 @@ class ActiveLearning:
             rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
             improvement.append(rmse)
 
-            print(f"Iteration {iteration + 1}, RMSE: {rmse}")
-            print('weights:',weights)
+            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
+            #print('weights:',weights)
 
             # Check for convergence (change in function value less than the tolerance)
             if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
+                #print(f"Convergence reached at iteration {iteration + 1}.")
                 break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
@@ -695,6 +695,9 @@ class ActiveLearning:
 
         for iteration in range(self.num_iterations):
 
+            if(iteration>24):
+                break
+
             curr_val_error = mean_squared_error(sample_values, self.model.get_model().predict(samples))
             if curr_val_error > prev_val_error:
                 increasing_error_count += 1
@@ -767,12 +770,12 @@ class ActiveLearning:
             rmse = (mean_squared_error(sample_values, self.model.get_model().predict(samples))) ** 0.5
             improvement.append(rmse)
 
-            print(f"Iteration {iteration + 1}, RMSE: {rmse}")
-            print('weights:',weights)
+            #print(f"Iteration {iteration + 1}, RMSE: {rmse}")
+            #print('weights:',weights)
 
             # Check for convergence (change in function value less than the tolerance)
             if len(improvement) > 1 and abs(improvement[-2] - improvement[-1]) <= self.tolerance:
-                print(f"Convergence reached at iteration {iteration + 1}.")
+                #print(f"Convergence reached at iteration {iteration + 1}.")
                 break
             samples = np.vstack([samples, chosen_new_point])
             sample_values = np.append(sample_values, chosen_new_value)
